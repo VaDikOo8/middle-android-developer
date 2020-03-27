@@ -2,11 +2,15 @@ package ru.skillbranch.skillarticles.ui
 
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
@@ -14,11 +18,14 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
+import ru.skillbranch.skillarticles.viewmodels.Notify
 import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
 
 class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
+    private var isSearchMode: Boolean = false
+    private var searchQuery: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,19 +40,70 @@ class RootActivity : AppCompatActivity() {
             renderUi(it)
             setupToolbar()
         }
+
+        viewModel.observeNotifications(this) {
+            renderNotification(it)
+        }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_search, menu)
+        val searchItem = menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as SearchView
+
+        if (isSearchMode) {
+            searchItem.expandActionView()
+            with(searchView) {
+                setQuery(searchQuery ?: "", true)
+                clearFocus()
+            }
+        }
+
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(true)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(false)
+                invalidateOptionsMenu()
+                return true
+            }
+        })
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.handleSearch(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearch(newText)
+                return true
+            }
+
+        })
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+
     private fun setupToolbar() {
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        val logo = if (toolbar.childCount > 2) toolbar.getChildAt(2) as ImageView else null
-        logo?.scaleType = ImageView.ScaleType.CENTER_CROP
-        val lp = logo?.layoutParams as? Toolbar.LayoutParams
-        lp?.let {
-            it.height = this.dpToIntPx(40)
-            it.width = this.dpToIntPx(40)
-            it.marginEnd = this.dpToIntPx(16)
-            logo.layoutParams = it
+        if (!isSearchMode) {
+            setSupportActionBar(toolbar)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            val logo = if (toolbar.childCount > 2 && toolbar.getChildAt(2) is ImageView)
+                toolbar.getChildAt(2) as ImageView
+            else null
+            logo?.scaleType = ImageView.ScaleType.CENTER_CROP
+            val lp = logo?.layoutParams as? Toolbar.LayoutParams
+            lp?.let {
+                it.height = this.dpToIntPx(40)
+                it.width = this.dpToIntPx(40)
+                it.marginEnd = this.dpToIntPx(16)
+                logo.layoutParams = it
+            }
         }
     }
 
@@ -77,6 +135,37 @@ class RootActivity : AppCompatActivity() {
         toolbar.title = data.title ?: "Skill Articles"
         toolbar.subtitle = data.category ?: "loading..."
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
+
+        isSearchMode = data.isSearch
+        searchQuery = data.searchQuery
+    }
+
+    private fun renderNotification(notify: Notify) {
+        val snackbar = Snackbar.make(coordinator_container, notify.message, Snackbar.LENGTH_LONG)
+            .setAnchorView(bottombar)
+
+        when (notify) {
+            is Notify.TextMessage -> { /*nothing*/
+            }
+            is Notify.ActionMessage -> {
+                snackbar.setActionTextColor(getColor(R.color.color_accent_dark))
+                snackbar.setAction(notify.actionLabel) {
+                    notify.actionHandler.invoke()
+                }
+            }
+            is Notify.ErrorMessage -> {
+                with(snackbar) {
+                    setBackgroundTint(getColor(R.color.design_default_color_error))
+                    setTextColor(getColor(android.R.color.white))
+                    setActionTextColor(getColor(android.R.color.white))
+                    setAction(notify.errLabel) {
+                        notify.errHandler?.invoke()
+                    }
+                }
+            }
+        }
+
+        snackbar.show()
     }
 
     private fun setupBottombar() {
