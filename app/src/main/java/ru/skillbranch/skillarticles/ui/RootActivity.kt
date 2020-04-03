@@ -24,7 +24,7 @@ import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
 class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
-    private var isSearchMode: Boolean = false
+    private var isSearchMode = false
     private var searchQuery: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +38,11 @@ class RootActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
         viewModel.observeState(this) {
             renderUi(it)
-            setupToolbar()
+
+            if (it.isSearch) {
+                isSearchMode = true
+                searchQuery = it.searchQuery
+            }
         }
 
         viewModel.observeNotifications(this) {
@@ -49,61 +53,59 @@ class RootActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_search, menu)
         val searchItem = menu?.findItem(R.id.action_search)
-        val searchView = searchItem?.actionView as SearchView
+        val searchView = (searchItem?.actionView as? SearchView)
+        searchView?.queryHint = getString(R.string.article_search_placeholder)
 
         if (isSearchMode) {
-            searchItem.expandActionView()
-            with(searchView) {
-                setQuery(searchQuery ?: "", true)
-                clearFocus()
-            }
+            searchItem?.expandActionView()
+            searchView?.setQuery(searchQuery, false)
+//            searchView?.clearFocus()
         }
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                viewModel.handleSearchMode(true)
-                return true
-            }
+        searchItem?.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    viewModel.handleSearchMode(true)
+                    return true
+                }
 
-            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                viewModel.handleSearchMode(false)
-                invalidateOptionsMenu()
-                return true
-            }
-        })
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    viewModel.handleSearchMode(false)
+                    return true
+                }
+            })
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.handleSearch(query)
-                return true
-            }
+        searchView?.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    viewModel.handleSearch(query)
+                    return true
+                }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.handleSearch(newText)
-                return true
-            }
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.handleSearch(newText)
+                    return true
+                }
 
-        })
+            })
 
         return super.onCreateOptionsMenu(menu)
     }
 
 
     private fun setupToolbar() {
-        if (!isSearchMode) {
-            setSupportActionBar(toolbar)
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            val logo = if (toolbar.childCount > 2 && toolbar.getChildAt(2) is ImageView)
-                toolbar.getChildAt(2) as ImageView
-            else null
-            logo?.scaleType = ImageView.ScaleType.CENTER_CROP
-            val lp = logo?.layoutParams as? Toolbar.LayoutParams
-            lp?.let {
-                it.height = this.dpToIntPx(40)
-                it.width = this.dpToIntPx(40)
-                it.marginEnd = this.dpToIntPx(16)
-                logo.layoutParams = it
-            }
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        val logo = if (toolbar.childCount > 2 && toolbar.getChildAt(2) is ImageView)
+            toolbar.getChildAt(2) as ImageView
+        else null
+        logo?.scaleType = ImageView.ScaleType.CENTER_CROP
+        val lp = logo?.layoutParams as? Toolbar.LayoutParams
+        lp?.let {
+            it.height = this.dpToIntPx(40)
+            it.width = this.dpToIntPx(40)
+            it.marginEnd = this.dpToIntPx(16)
+            logo.layoutParams = it
         }
     }
 
@@ -136,8 +138,9 @@ class RootActivity : AppCompatActivity() {
         toolbar.subtitle = data.category ?: "loading..."
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
 
-        isSearchMode = data.isSearch
-        searchQuery = data.searchQuery
+        if (!isSearchMode) {
+            setupToolbar()
+        }
     }
 
     private fun renderNotification(notify: Notify) {
