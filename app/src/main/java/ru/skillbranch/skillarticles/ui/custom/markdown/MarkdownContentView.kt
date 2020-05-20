@@ -17,7 +17,6 @@ import ru.skillbranch.skillarticles.extensions.groupByBounds
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import kotlin.properties.Delegates
 
-@Suppress("UNCHECKED_CAST", "TYPE_MISMATCH")
 class MarkdownContentView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -198,7 +197,7 @@ class MarkdownContentView @JvmOverloads constructor(
         constructor(parcel: Parcel) : this() {
             ids = parcel.readArrayList(Int::class.java.classLoader) as ArrayList<Int>
             container =
-                parcel.readSparseArray(this::class.java.classLoader) as SparseArray<Parcelable>
+                parcel.readSparseArray<Parcelable>(this::class.java.classLoader) as SparseArray<Parcelable>
         }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -229,6 +228,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
         constructor(superState: Parcelable?) : super(superState)
 
+        @Suppress("UNCHECKED_CAST")
         constructor(src: Parcel) : super(src) {
             layout = src.readParcelable(LayoutManager::class.java.classLoader)!!
         }
