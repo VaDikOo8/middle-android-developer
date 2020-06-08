@@ -81,6 +81,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
     fun setContent(content: List<MarkdownElement>) {
         elements = content
+        var index = 0
         content.forEach {
             when (it) {
                 is MarkdownElement.Text -> {
@@ -106,6 +107,8 @@ class MarkdownContentView @JvmOverloads constructor(
                     )
 
                     addView(iv)
+                    layoutManager.attachToParent(iv, index)
+                    index++
                 }
 
                 is MarkdownElement.Scroll -> {
@@ -115,6 +118,8 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.blockCode.text
                     )
                     addView(sv)
+                    layoutManager.attachToParent(sv, index)
+                    index++
                 }
             }
         }
@@ -176,15 +181,9 @@ class MarkdownContentView @JvmOverloads constructor(
     override fun onRestoreInstanceState(state: Parcelable?) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) layoutManager = state.layout
-
-        children.filter { it !is MarkdownTextView }
-            .forEachIndexed { index, it -> layoutManager.attachToParent(it, index) }
     }
 
     override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
-        children.filter { it !is MarkdownTextView }
-            .forEachIndexed { index, it -> layoutManager.attachToParent(it, index) }
-
         children.filter { it !is MarkdownTextView }
             .forEach { it.saveHierarchyState(layoutManager.container) }
         dispatchFreezeSelfOnly(container)
@@ -194,6 +193,7 @@ class MarkdownContentView @JvmOverloads constructor(
         var ids: MutableList<Int> = mutableListOf()
         var container: SparseArray<Parcelable> = SparseArray()
 
+        @Suppress("UNCHECKED_CAST")
         constructor(parcel: Parcel) : this() {
             ids = parcel.readArrayList(Int::class.java.classLoader) as ArrayList<Int>
             container =
