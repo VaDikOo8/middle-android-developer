@@ -161,9 +161,15 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
         measureChild(iv_bookmark, widthMeasureSpec, heightMeasureSpec)
 
         usedHeight += tv_date.measuredHeight
-        usedHeight += defaultMargin + posterSize + categorySize / 2
+        usedHeight += defaultMargin + max(tv_title.measuredHeight, posterSize + categorySize / 2)
         usedHeight += defaultMargin + tv_description.measuredHeight
-        usedHeight += defaultMargin + iconSize + paddingBottom
+        usedHeight += defaultMargin +
+                listOf(
+                    iconSize,
+                    tv_likes_count.measuredHeight,
+                    tv_comments_count.measuredHeight,
+                    tv_read_duration.measuredHeight
+                ).max()!! + paddingBottom
 
         setMeasuredDimension(width, usedHeight)
     }
@@ -189,28 +195,35 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
         )
 
         usedHeight += tv_date.measuredHeight + defaultMargin
-        val headerHeight =
-            max(tv_title.measuredHeight, iv_poster.measuredHeight + iv_category.measuredHeight / 2)
+
+        val headerIconsHeight = iv_poster.measuredHeight + iv_category.measuredHeight / 2
+        val headerHeight = max(tv_title.measuredHeight, headerIconsHeight)
+        val tvTitleSpace =
+            if (headerHeight > tv_title.measuredHeight) (headerHeight - tv_title.measuredHeight) / 2
+            else 0
+        val headerIconsSpace =
+            if (headerHeight > headerIconsHeight) (headerHeight - headerIconsHeight) / 2
+            else 0
 
         tv_title.layout(
             left,
-            usedHeight,
+            usedHeight + tvTitleSpace,
             right - iv_poster.measuredWidth - titleMarginEnd,
-            usedHeight + tv_title.measuredHeight
+            usedHeight + tv_title.measuredHeight + tvTitleSpace
         )
 
         iv_poster.layout(
             right - iv_poster.measuredWidth,
-            usedHeight,
+            usedHeight + headerIconsSpace,
             right,
-            usedHeight + iv_poster.measuredHeight
+            usedHeight + iv_poster.measuredHeight + headerIconsSpace
         )
 
         iv_category.layout(
-            right - iv_poster.measuredWidth - iv_category.measuredWidth / 2,
-            usedHeight + iv_poster.measuredHeight - iv_category.measuredHeight / 2,
-            right - iv_poster.measuredWidth + iv_category.measuredWidth / 2,
-            usedHeight + iv_poster.measuredHeight + iv_category.measuredHeight / 2
+            iv_poster.left - iv_category.measuredWidth / 2,
+            iv_poster.bottom - iv_category.measuredHeight / 2,
+            iv_poster.left + iv_category.measuredWidth / 2,
+            iv_poster.bottom + iv_category.measuredHeight / 2
         )
 
         usedHeight += headerHeight + defaultMargin
@@ -224,11 +237,13 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
 
         usedHeight += tv_description.measuredHeight + defaultMargin
 
+        var iconTextSpace = (tv_likes_count.measuredHeight - iv_likes.measuredHeight) / 2
+
         iv_likes.layout(
             left,
-            usedHeight,
+            usedHeight + iconTextSpace,
             left + iconSize,
-            usedHeight + iconSize
+            usedHeight + iconSize + iconTextSpace
         )
 
         left = iv_likes.right + defaultMargin
@@ -241,12 +256,13 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
         )
 
         left = tv_likes_count.right + 2 * defaultMargin
+        iconTextSpace = (tv_comments_count.measuredHeight - iv_comments.measuredHeight) / 2
 
         iv_comments.layout(
             left,
-            usedHeight,
+            usedHeight + iconTextSpace,
             left + iconSize,
-            usedHeight + iconSize
+            usedHeight + iconSize + iconTextSpace
         )
 
         left = iv_comments.right + defaultMargin
@@ -268,12 +284,13 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
         )
 
         left = defaultPadding
+        iconTextSpace = (tv_read_duration.measuredHeight - iv_bookmark.measuredHeight) / 2
 
         iv_bookmark.layout(
             left + bodyWidth - iconSize,
-            usedHeight,
+            usedHeight + iconTextSpace,
             left + bodyWidth,
-            usedHeight + iconSize
+            usedHeight + iconSize + iconTextSpace
         )
     }
 
