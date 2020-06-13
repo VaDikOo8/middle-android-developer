@@ -160,7 +160,7 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
         measureChild(tv_read_duration, widthMeasureSpec, heightMeasureSpec)
         measureChild(iv_bookmark, widthMeasureSpec, heightMeasureSpec)
 
-        usedHeight += tv_date.measuredHeight
+        usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight)
         usedHeight += defaultMargin + max(tv_title.measuredHeight, posterSize + categorySize / 2)
         usedHeight += defaultMargin + tv_description.measuredHeight
         usedHeight += defaultMargin +
@@ -194,7 +194,7 @@ class ArticleItemView(context: Context) : ViewGroup(context, null, 0), LayoutCon
             usedHeight + tv_author.measuredHeight
         )
 
-        usedHeight += tv_date.measuredHeight + defaultMargin
+        usedHeight += max(tv_date.measuredHeight, tv_author.measuredHeight) + defaultMargin
 
         val headerIconsHeight = iv_poster.measuredHeight + iv_category.measuredHeight / 2
         val headerHeight = max(tv_title.measuredHeight, headerIconsHeight)
