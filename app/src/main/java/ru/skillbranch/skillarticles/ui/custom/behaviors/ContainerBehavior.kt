@@ -32,7 +32,7 @@ class ContainerBehavior() : AppBarLayout.ScrollingViewBehavior() {
                 child,
                 parentWidthMeasureSpec,
                 widthUsed,
-                parentHeightMeasureSpec,
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY),
                 heightUsed
             )
             return true

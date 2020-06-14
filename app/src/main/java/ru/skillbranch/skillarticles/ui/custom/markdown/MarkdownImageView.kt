@@ -56,8 +56,6 @@ class MarkdownImageView private constructor(
     val tv_title: MarkdownTextView
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var tv_alt: TextView? = null
-    var isOpen: Boolean = false
-    var aspectRatio: Float = 0f
 
     @Px
     private val titleTopMargin: Int = context.dpToIntPx(8)
@@ -80,6 +78,9 @@ class MarkdownImageView private constructor(
         color = lineColor
         strokeWidth = 0f
     }
+
+    var isOpen: Boolean = false
+    var aspectRatio: Float = 0f
 
     init {
         layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
@@ -138,10 +139,19 @@ class MarkdownImageView private constructor(
 
             iv_image.setOnClickListener {
                 if (tv_alt?.isVisible == true) animateHideAlt() else animateShowAlt()
+                isOpen = !isOpen
             }
         }
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        Glide
+            .with(context)
+            .load(imageUrl)
+            .transform(AspectRatioResizeTransform())
+            .into(iv_image)
+    }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -152,7 +162,12 @@ class MarkdownImageView private constructor(
         //all children width == parent width (constraint parent width)
         val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
 
-        iv_image.measure(ms, heightMeasureSpec)
+        if (aspectRatio != 0f) {
+            val hms =
+                MeasureSpec.makeMeasureSpec((width / aspectRatio).toInt(), MeasureSpec.EXACTLY)
+            iv_image.measure(ms, hms)
+        } else iv_image.measure(ms, heightMeasureSpec)
+
         tv_title.measure(ms, heightMeasureSpec)
         tv_alt?.measure(ms, heightMeasureSpec)
 
@@ -205,17 +220,18 @@ class MarkdownImageView private constructor(
             linePositionY,
             linePaint
         )
+        val l = canvas.width - titlePadding.toFloat()
+        val r = canvas.width.toFloat()
         canvas.drawLine(
-            canvas.width - titlePadding.toFloat(),
+            l,
             linePositionY,
-            canvas.width.toFloat(),
+            r,
             linePositionY,
             linePaint
         )
     }
 
     private fun animateShowAlt() {
-        isOpen = true
         tv_alt?.isVisible = isOpen
         val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
@@ -229,7 +245,6 @@ class MarkdownImageView private constructor(
     }
 
     private fun animateHideAlt() {
-        isOpen = false
         val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
             tv_alt,
