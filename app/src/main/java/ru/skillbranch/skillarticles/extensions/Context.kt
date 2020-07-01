@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 
 fun Context.dpToPx(dp: Int): Float {
     return TypedValue.applyDimension(
@@ -36,6 +37,11 @@ fun Context.attrValue(colorPrimary: Int): Int {
 fun Context.hideKeyboard(view: View) {
     val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+fun Context.showKeyboard(view: EditText) {
+    val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
 }
 
 val Context.isNetworkAvailable: Boolean
