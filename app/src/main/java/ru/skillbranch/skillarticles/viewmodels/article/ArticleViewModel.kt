@@ -182,11 +182,13 @@ class ArticleViewModel(
     }
 
     fun handleSendComment(comment: String) {
+        updateState { it.copy(comment = comment) }
+        saveState()
         if (!currentState.isAuth) navigate(NavigationCommand.StartLogin())
         viewModelScope.launch {
             repository.sendComment(articleId, comment, currentState.answerToSlug)
             withContext(Dispatchers.Main) {
-                updateState { it.copy(answerTo = null, answerToSlug = null) }
+                updateState { it.copy(answerTo = null, answerToSlug = null, comment = null) }
             }
         }
     }
@@ -213,7 +215,7 @@ class ArticleViewModel(
     }
 
     fun handleClearComment() {
-        updateState { it.copy(answerTo = null, answerToSlug = null) }
+        updateState { it.copy(answerTo = null, answerToSlug = null, comment = null) }
     }
 
     fun handleReplyTo(slug: String, name: String) {
@@ -245,23 +247,24 @@ data class ArticleState(
     val commentsCount: Int = 0,
     val answerTo: String? = null,
     val answerToSlug: String? = null,
-    val showBottomBar: Boolean = true
+    val showBottomBar: Boolean = true,
+    val comment: String? = null
 ) : IViewModelState {
     override fun save(outState: SavedStateHandle) {
-        //TODO save state
         outState.set("isSearch", isSearch)
         outState.set("searchQuery", searchQuery)
         outState.set("searchResults", searchResults)
         outState.set("searchPosition", searchPosition)
+        outState.set("comment", comment)
     }
 
     override fun restore(savedState: SavedStateHandle): IViewModelState {
-        //TODO restore state
         return copy(
             isSearch = savedState["isSearch"] ?: false,
             searchQuery = savedState["searchQuery"],
             searchResults = savedState["searchResults"] ?: emptyList(),
-            searchPosition = savedState["searchPosition"] ?: 0
+            searchPosition = savedState["searchPosition"] ?: 0,
+            comment = savedState["comment"]
         )
     }
 }

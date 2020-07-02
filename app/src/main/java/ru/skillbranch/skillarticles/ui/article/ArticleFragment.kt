@@ -303,6 +303,14 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             if (submenu.isOpen) submenu.isVisible = it
         }
 
+        private var comment by RenderProp("") {
+            if (it.isBlank()) {
+                et_comment.text = null
+            } else {
+                et_comment.setText(it)
+            }
+        }
+
         override val afterInflated: (() -> Unit)? = {
             dependsOn<Boolean, Boolean, List<Pair<Int, Int>>, Int>(
                 ::isLoadingContent,
@@ -341,6 +349,8 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             searchResults = data.searchResults
             answerTo = data.answerTo ?: "Comment"
             isShowBottombar = data.showBottomBar
+
+            comment = data.comment ?: ""
         }
 
         override fun saveUi(outState: Bundle) {
