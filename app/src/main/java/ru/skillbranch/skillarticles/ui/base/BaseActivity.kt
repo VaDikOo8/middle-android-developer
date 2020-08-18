@@ -11,6 +11,7 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.children
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
@@ -19,6 +20,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions.circleCropTransform
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.android.synthetic.main.activity_root.*
+import kotlinx.android.synthetic.main.activity_root.view.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
@@ -27,8 +29,8 @@ import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatActivity() {
-    protected abstract val layout: Int
     protected abstract val viewModel: T
+    protected abstract val layout: Int
     lateinit var navController: NavController
 
     val toolbarBuilder = ToolbarBuilder()
@@ -74,10 +76,12 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
                     command.extras
                 )
             }
+
             is NavigationCommand.FinishLogin -> {
                 navController.navigate(R.id.finish_login)
                 if (command.privateDestination != null) navController.navigate(command.privateDestination)
             }
+
             is NavigationCommand.StartLogin -> {
                 navController.navigate(
                     R.id.start_login,
@@ -93,7 +97,7 @@ class ToolbarBuilder() {
     var subtitle: String? = null
     var logo: String? = null
     var visibility: Boolean = true
-    var items: MutableList<MenuItemHolder> = mutableListOf()
+    val items: MutableList<MenuItemHolder> = mutableListOf()
 
     fun setTitle(title: String): ToolbarBuilder {
         this.title = title
@@ -107,11 +111,6 @@ class ToolbarBuilder() {
 
     fun setLogo(logo: String): ToolbarBuilder {
         this.logo = logo
-        return this
-    }
-
-    fun setVisibility(isVisible: Boolean): ToolbarBuilder {
-        this.visibility = isVisible
         return this
     }
 
@@ -135,6 +134,7 @@ class ToolbarBuilder() {
     }
 
     fun build(context: FragmentActivity) {
+
         //show appbar if hidden due to scroll behavior
         context.appbar.setExpanded(true, true)
 
@@ -147,9 +147,10 @@ class ToolbarBuilder() {
                 val logoPlaceholder = getDrawable(context, R.drawable.logo_placeholder)
 
                 logo = logoPlaceholder
-
-                val logo = children.last() as? ImageView
-                if (logo != null) {
+                toolbar.logoDescription = "logo"
+                toolbar.doOnNextLayout {
+                    val logo =
+                        children.filter { it.contentDescription == "logo" }.first() as ImageView
                     logo.scaleType = ImageView.ScaleType.CENTER_CROP
                     (logo.layoutParams as? Toolbar.LayoutParams)?.let {
                         it.width = logoSize
@@ -169,7 +170,6 @@ class ToolbarBuilder() {
             }
         }
     }
-
 }
 
 data class MenuItemHolder(
@@ -180,7 +180,7 @@ data class MenuItemHolder(
     val clickListener: ((MenuItem) -> Unit)? = null
 )
 
-class BottombarBuilder {
+class BottombarBuilder() {
     private var visible: Boolean = true
     private val views = mutableListOf<Int>()
     private val tempViews = mutableListOf<Int>()
@@ -214,7 +214,9 @@ class BottombarBuilder {
                 val view = context.container.findViewById<View>(it)
                 context.container.removeView(view)
             }
+
             tempViews.clear()
+//            context.clearFindViewByIdCache()
         }
 
         //add new bottom bar views
@@ -233,5 +235,7 @@ class BottombarBuilder {
             ((layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior)
                 .slideUp(this)
         }
+
     }
+
 }

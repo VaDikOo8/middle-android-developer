@@ -6,7 +6,6 @@ import android.graphics.*
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -79,11 +78,11 @@ class MarkdownImageView private constructor(
         strokeWidth = 0f
     }
 
-    var isOpen: Boolean = false
-    var aspectRatio: Float = 0f
+    private var isOpen = false
+    private var aspectRatio = 0f
 
     init {
-        layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
@@ -114,16 +113,12 @@ class MarkdownImageView private constructor(
         title: CharSequence,
         alt: String?
     ) : this(context, fontSize) {
+
         imageUrl = url
         imageTitle = title
 
         tv_title.setText(title, TextView.BufferType.SPANNABLE)
 
-        Glide
-            .with(context)
-            .load(url)
-            .transform(AspectRatioResizeTransform())
-            .into(iv_image)
 
         if (alt != null) {
             tv_alt = TextView(context).apply {
@@ -138,7 +133,8 @@ class MarkdownImageView private constructor(
             addView(tv_alt)
 
             iv_image.setOnClickListener {
-                if (tv_alt?.isVisible == true) animateHideAlt() else animateShowAlt()
+                if (tv_alt?.isVisible == true) animateHideAlt()
+                else animateShowAlt()
                 isOpen = !isOpen
             }
         }
@@ -153,21 +149,22 @@ class MarkdownImageView private constructor(
             .into(iv_image)
     }
 
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = 0
-        val width = View.getDefaultSize(suggestedMinimumHeight, widthMeasureSpec)
+        val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
 
         //create measureSpec for children EXACTLY
         //all children width == parent width (constraint parent width)
         val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
 
         if (aspectRatio != 0f) {
+            //restore width/height by aspectRatio
             val hms =
                 MeasureSpec.makeMeasureSpec((width / aspectRatio).toInt(), MeasureSpec.EXACTLY)
             iv_image.measure(ms, hms)
         } else iv_image.measure(ms, heightMeasureSpec)
-
         tv_title.measure(ms, heightMeasureSpec)
         tv_alt?.measure(ms, heightMeasureSpec)
 
@@ -208,6 +205,7 @@ class MarkdownImageView private constructor(
             right,
             iv_image.measuredHeight
         )
+
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -220,19 +218,20 @@ class MarkdownImageView private constructor(
             linePositionY,
             linePaint
         )
+
         val l = canvas.width - titlePadding.toFloat()
         val r = canvas.width.toFloat()
         canvas.drawLine(
-            l,
+            canvas.width - titlePadding.toFloat(),
             linePositionY,
-            r,
+            canvas.width.toFloat(),
             linePositionY,
             linePaint
         )
     }
 
     private fun animateShowAlt() {
-        tv_alt?.isVisible = isOpen
+        tv_alt?.isVisible = true
         val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
             tv_alt,
@@ -258,28 +257,19 @@ class MarkdownImageView private constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        Log.d("M_MarkdownImageView", "onSaveInstanceState()")
-        val savedState = SavedState(super.onSaveInstanceState())
+        val savedState =
+            SavedState(super.onSaveInstanceState())
         savedState.ssIsOpen = isOpen
-        savedState.ssAspectRatio = (iv_image.width.toFloat()) / iv_image.height
-        Log.d(
-            "M_MarkdownImageView",
-            "onSaveInstanceState(): savedState.ssIsOpen=$isOpen savedState.ssAspectRatio=${savedState.ssAspectRatio}"
-        )
+        savedState.ssAspectRatio = (iv_image.width.toFloat() / iv_image.height)
         return savedState
     }
 
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        Log.d("M_MarkdownImageView", "onRestoreInstanceState()")
+    override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
             isOpen = state.ssIsOpen
             aspectRatio = state.ssAspectRatio
             tv_alt?.isVisible = isOpen
-            Log.d(
-                "M_MarkdownImageView",
-                "onRestoreInstanceState(): isOpen=$isOpen aspectRatio=$aspectRatio"
-            )
         }
     }
 
@@ -290,30 +280,24 @@ class MarkdownImageView private constructor(
         constructor(superState: Parcelable?) : super(superState)
 
         constructor(src: Parcel) : super(src) {
-            Log.d("M_MarkdownImageView", "SavedState constructor")
+            //restore state from parcel
             ssIsOpen = src.readInt() == 1
             ssAspectRatio = src.readFloat()
-            Log.d(
-                "M_MarkdownImageView",
-                "SavedState constructor: readInt ssIsOpen=$ssIsOpen ssAspectRatio=$ssAspectRatio"
-            )
         }
 
         override fun writeToParcel(dst: Parcel, flags: Int) {
-            Log.d("M_MarkdownImageView", "SavedState writeToParcel")
+            //write state to parcel
             super.writeToParcel(dst, flags)
             dst.writeInt(if (ssIsOpen) 1 else 0)
             dst.writeFloat(ssAspectRatio)
-            Log.d(
-                "M_MarkdownCodeView",
-                "SavedState writeToParcel: writeInt ssIsOpen=$ssIsOpen ssAspectRatio=$ssAspectRatio"
-            )
         }
 
-        override fun describeContents(): Int = 0
+        override fun describeContents() = 0
 
         companion object CREATOR : Parcelable.Creator<SavedState> {
-            override fun createFromParcel(parcel: Parcel): SavedState = SavedState(parcel)
+            override fun createFromParcel(parcel: Parcel) =
+                SavedState(parcel)
+
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
     }

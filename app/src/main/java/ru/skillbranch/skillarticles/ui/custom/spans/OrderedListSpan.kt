@@ -27,7 +27,6 @@ class OrderedListSpan(
         lineTop: Int, lineBaseline: Int, lineBottom: Int, text: CharSequence?, lineStart: Int,
         lineEnd: Int, isFirstLine: Boolean, layout: Layout?
     ) {
-        //only for first line draw number of line
         if (isFirstLine) {
             paint.withCustomColor {
                 canvas.drawText(

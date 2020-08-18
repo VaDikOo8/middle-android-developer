@@ -9,7 +9,6 @@ import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 
 abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment() {
-
     val root: RootActivity
         get() = activity as RootActivity
     open val binding: Binding? = null
@@ -31,6 +30,7 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(layout, container, false)
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -40,7 +40,6 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
             .prepare(prepareToolbar)
             .build(root)
 
-        //prepare bottombar
         root.bottombarBuilder
             .invalidate()
             .prepare(prepareBottombar)

@@ -21,7 +21,6 @@ class MarkdownBuilder(context: Context) {
     private val colorPrimary = context.attrValue(R.attr.colorPrimary)
     private val colorDivider = context.getColor(R.color.color_divider)
     private val colorOnSurface = context.attrValue(R.attr.colorOnSurface)
-    private val colorSurface = context.attrValue(R.attr.colorSurface)
     private val opacityColorSurface = context.getColor(R.color.opacity_color_surface)
     private val gap: Float = context.dpToPx(8)
     private val bulletRadius = context.dpToPx(4)
@@ -44,13 +43,15 @@ class MarkdownBuilder(context: Context) {
         return builder.apply {
             when (element) {
                 is Element.Text -> append(element.text)
-                is Element.UnorderedListItem ->
+                is Element.UnorderedListItem -> {
                     inSpans(UnorderedListSpan(gap, bulletRadius, colorSecondary)) {
                         for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
-                is Element.Quote ->
+                }
+
+                is Element.Quote -> {
                     inSpans(
                         BlockquotesSpan(gap, strikeWidth, colorSecondary),
                         StyleSpan(Typeface.ITALIC)
@@ -59,7 +60,9 @@ class MarkdownBuilder(context: Context) {
                             buildElement(child, builder)
                         }
                     }
-                is Element.Header ->
+                }
+
+                is Element.Header -> {
                     inSpans(
                         HeaderSpan(
                             element.level,
@@ -71,29 +74,39 @@ class MarkdownBuilder(context: Context) {
                     ) {
                         append(element.text)
                     }
-                is Element.Italic ->
+                }
+
+                is Element.Italic -> {
                     inSpans(StyleSpan(Typeface.ITALIC)) {
                         for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
-                is Element.Bold ->
+                }
+
+                is Element.Bold -> {
                     inSpans(StyleSpan(Typeface.BOLD)) {
                         for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
-                is Element.Strike ->
+                }
+
+                is Element.Strike -> {
                     inSpans(StrikethroughSpan()) {
                         for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
-                is Element.Rule ->
+                }
+
+                is Element.Rule -> {
                     inSpans(HorizontalRuleSpan(ruleWidth, colorDivider)) {
                         append(element.text)
                     }
-                is Element.InlineCode ->
+                }
+
+                is Element.InlineCode -> {
                     inSpans(
                         InlineCodeSpan(
                             colorOnSurface,
@@ -104,19 +117,26 @@ class MarkdownBuilder(context: Context) {
                     ) {
                         append(element.text)
                     }
-                is Element.Link ->
+                }
+
+                is Element.Link -> {
                     inSpans(
                         IconLinkSpan(linkIcon, gap, colorPrimary, strikeWidth),
                         URLSpan(element.link)
                     ) {
                         append(element.text)
                     }
-                is Element.OrderedListItem ->
-                    inSpans(OrderedListSpan(gap, element.order, colorSecondary)) {
+                }
+
+
+                is Element.OrderedListItem -> {
+                    inSpans(OrderedListSpan(gap, element.order, colorPrimary)) {
                         for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
+                }
+
                 else -> append(element.text)
             }
         }

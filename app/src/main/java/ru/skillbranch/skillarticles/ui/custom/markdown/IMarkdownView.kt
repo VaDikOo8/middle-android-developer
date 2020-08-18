@@ -15,7 +15,9 @@ interface IMarkdownView {
         offset: Int
     ) {
         clearSearchResult()
-        val offsetResult = results.map { (start, end) -> start.minus(offset) to end.minus(offset) }
+        val offsetResult = results
+            .map { (start, end) -> start.minus(offset) to end.minus(offset) }
+
         try {
             offsetResult.forEach { (start, end) ->
                 spannableContent.setSpan(
@@ -26,6 +28,7 @@ interface IMarkdownView {
                 )
             }
         } catch (e: Exception) {
+
         }
     }
 

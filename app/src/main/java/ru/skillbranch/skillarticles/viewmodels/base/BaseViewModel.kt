@@ -39,7 +39,7 @@ abstract class BaseViewModel<T : IViewModelState>(
      * модифицированное состояние, которое присваивается текущему состоянию
      */
     @UiThread
-    protected inline fun updateState(update: (currentState: T) -> T) {
+    inline fun updateState(update: (currentState: T) -> T) {
         val updatedState: T = update(currentState)
         state.value = updatedState
     }
@@ -51,8 +51,7 @@ abstract class BaseViewModel<T : IViewModelState>(
      */
     @UiThread
     protected fun notify(content: Notify) {
-        notifications.value =
-            Event(content)
+        notifications.value = Event(content)
     }
 
     open fun navigate(command: NavigationCommand) {
@@ -65,6 +64,7 @@ abstract class BaseViewModel<T : IViewModelState>(
      */
     fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
         state.observe(owner, Observer { onChanged(it!!) })
+
     }
 
     /***
@@ -74,23 +74,16 @@ abstract class BaseViewModel<T : IViewModelState>(
      */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
         notifications.observe(owner,
-            EventObserver {
-                onNotify(it)
-            })
+            EventObserver { onNotify(it) })
     }
 
-    fun observeNavigation(
-        owner: LifecycleOwner,
-        onNavigate: (command: NavigationCommand) -> Unit
-    ) {
+    fun observeNavigation(owner: LifecycleOwner, onNavigate: (command: NavigationCommand) -> Unit) {
         navigation.observe(owner,
-            EventObserver {
-                onNavigate(it)
-            })
+            EventObserver { onNavigate(it) })
     }
 
     /***
-     * функция принимает источник данных и лямбда выражение, обрабатывающее поступающие данные источника
+     * функция принимает источник данных и лямбда выражение обрабатывающее поступающие данные источника
      * лямбда принимает новые данные и текущее состояние ViewModel в качестве аргументов,
      * изменяет его и возвращает модифицированное состояние, которое устанавливается как текущее
      */
@@ -103,21 +96,24 @@ abstract class BaseViewModel<T : IViewModelState>(
         }
     }
 
-    fun saveState() {
+    open fun saveState() {
         currentState.save(handleState)
     }
 
     @Suppress("UNCHECKED_CAST")
     fun restoreState() {
+        val restoredState = currentState.restore(handleState) as T
+        if (currentState == restoredState) return
         state.value = currentState.restore(handleState) as T
     }
+
 }
 
 class Event<out E>(private val content: E) {
     var hasBeenHandled = false
 
     /***
-     * возвращает контент, который еще не был обработан, иначе null
+     * возвращает контент который еще не был обработан иначе null
      */
     fun getContentIfNotHandled(): E? {
         return if (hasBeenHandled) null
@@ -131,8 +127,8 @@ class Event<out E>(private val content: E) {
 }
 
 /***
- * в качестве аргумента конструктора принимает лямбда выражение обработчик в аргумент, которой передается
- * необработанное ранее событие, получаемое в реализации метода Observer`a onChanged
+ * в качестве аргумента конструктора принимает лямбда выражение обработчик в аргумент которой передается
+ * необработанное ранее событие получаемое в реализации метода Observer`a onChanged
  */
 class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Observer<Event<E>> {
 

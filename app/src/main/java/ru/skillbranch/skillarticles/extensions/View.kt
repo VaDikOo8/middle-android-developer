@@ -2,25 +2,10 @@ package ru.skillbranch.skillarticles.extensions
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
 import androidx.core.view.*
 import androidx.navigation.NavDestination
 import com.google.android.material.bottomnavigation.BottomNavigationView
-
-fun View.setMarginOptionally(
-    left: Int = marginLeft,
-    top: Int = marginTop,
-    right: Int = marginRight,
-    bottom: Int = marginBottom
-) {
-    val mlp = this.layoutParams as ViewGroup.MarginLayoutParams
-    mlp.let {
-        it.leftMargin = left
-        it.rightMargin = top
-        it.rightMargin = right
-        it.bottomMargin = bottom
-        this.layoutParams = it
-    }
-}
 
 fun View.setPaddingOptionally(
     left: Int = paddingLeft,
@@ -32,9 +17,26 @@ fun View.setPaddingOptionally(
 }
 
 fun BottomNavigationView.selectDestination(destination: NavDestination) {
-    menu.forEach {
-        if (it.itemId == destination.id) it.isChecked = true
+    for (item in menu.iterator()) {
+        if (matchDestination(destination, item.itemId)) {
+            item.isChecked = true
+        }
     }
+}
+
+fun View.setMarginOptionally(
+    left: Int = marginLeft,
+    top: Int = marginTop,
+    right: Int = marginRight,
+    bottom: Int = marginBottom
+) {
+    (layoutParams as? ViewGroup.MarginLayoutParams)?.run {
+        leftMargin = left
+        rightMargin = right
+        topMargin = top
+        bottomMargin = bottom
+    }
+//    requestLayout()
 }
 
 fun BottomNavigationView.selectItem(itemId: Int?) {
@@ -45,4 +47,12 @@ fun BottomNavigationView.selectItem(itemId: Int?) {
             break
         }
     }
+}
+
+fun matchDestination(destination: NavDestination, @IdRes destId: Int): Boolean {
+    var currentDestination: NavDestination? = destination
+    while (currentDestination!!.id != destId && currentDestination.parent != null) {
+        currentDestination = currentDestination.parent
+    }
+    return currentDestination.id == destId
 }

@@ -65,6 +65,7 @@ class IconLinkSpan(
         end: Int,
         fm: Paint.FontMetricsInt?
     ): Int {
+
         if (fm != null) {
             iconSize = fm.descent - fm.ascent //fontSize
             linkDrawable.setBounds(0, 0, iconSize, iconSize)

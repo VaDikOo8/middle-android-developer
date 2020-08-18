@@ -10,6 +10,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.annotation.AttrRes
 
 fun Context.dpToPx(dp: Int): Float {
     return TypedValue.applyDimension(
@@ -26,12 +27,6 @@ fun Context.dpToIntPx(dp: Int): Int {
         dp.toFloat(),
         this.resources.displayMetrics
     ).toInt()
-}
-
-fun Context.attrValue(colorPrimary: Int): Int {
-    val tv = TypedValue()
-    return if (this.theme.resolveAttribute(colorPrimary, tv, true)) tv.data
-    else throw Resources.NotFoundException("Resource with if $colorPrimary not found")
 }
 
 fun Context.hideKeyboard(view: View) {
@@ -58,3 +53,11 @@ val Context.isNetworkAvailable: Boolean
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
         }
     }
+
+fun Context.attrValue(@AttrRes res: Int): Int {
+    val value: Int?
+    val tv = TypedValue()
+    if (this.theme.resolveAttribute(res, tv, true)) value = tv.data
+    else throw Resources.NotFoundException("Resource with id $res not found")
+    return value
+}

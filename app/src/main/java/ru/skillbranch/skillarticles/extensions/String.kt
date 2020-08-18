@@ -1,18 +1,19 @@
 package ru.skillbranch.skillarticles.extensions
 
-import java.util.*
-
-fun String?.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
-    this ?: return emptyList()
+fun String?.indexesOf(
+    substr: String,
+    ignoreCase: Boolean = true
+): List<Int> {
     val result = mutableListOf<Int>()
-    if (substr.isNotEmpty()) {
-        substr.toLowerCase(ignoreCase).toRegex()
-            .findAll(this.toLowerCase(ignoreCase))
-            .forEach {
-                result.add(it.range.first)
+    if (!this.isNullOrEmpty() && substr.isNotEmpty()) {
+        var index = 0
+        while (index > -1) {
+            index = indexOf(substr, index, ignoreCase)
+            if (index > -1) {
+                result.add(index)
+                index += substr.length
             }
+        }
     }
     return result
 }
-
-private fun String.toLowerCase(flag: Boolean) = if (flag) this.toLowerCase(Locale.ROOT) else this

@@ -55,6 +55,7 @@ class HeaderSpan constructor(
         lineHeight: Int,
         fm: Paint.FontMetricsInt?
     ) {
+
         fm ?: return
 
         text as Spanned
@@ -69,6 +70,7 @@ class HeaderSpan constructor(
         } else {
             fm.ascent = originAscent
         }
+
 
         //line break +1 character
         if (spanEnd == end.dec()) {
@@ -118,6 +120,7 @@ class HeaderSpan constructor(
                 )
             }
         }
+
 //        canvas.drawFontLines(lineTop, lineBottom, lineBaseline, paint)
     }
 
@@ -144,18 +147,19 @@ class HeaderSpan constructor(
     private fun Canvas.drawFontLines(
         top: Int,
         bottom: Int,
-        lineBaseLine: Int,
+        lineBaseline: Int,
         paint: Paint
     ) {
         drawLine(0f, top + 0f, width + 0f, top + 0f, Paint().apply { color = Color.BLUE })
         drawLine(0f, bottom + 0f, width + 0f, bottom + 0f, Paint().apply { color = Color.GREEN })
         drawLine(
             0f,
-            lineBaseLine + 0f,
+            lineBaseline + 0f,
             width + 0f,
-            lineBaseLine + 0f,
+            lineBaseline + 0f,
             Paint().apply { color = Color.RED })
-//        drawLine(0f, paint.ascent() + lineBaseLine, width + 0f, paint.ascent() + lineBaseLine, Paint().apply { color = Color.BLACK })
-//        drawLine(0f, paint.descent() + lineBaseLine, width + 0f, paint.descent() + lineBaseLine, Paint().apply { color = Color.MAGENTA })
+//        drawLine(0f,paint.ascent() + lineBaseline,width + 0f,paint.ascent() + lineBaseline,Paint().apply { color = Color.BLACK })
+//        drawLine(0f,paint.descent() + lineBaseline,width + 0f,paint.descent() + lineBaseline,Paint().apply { color = Color.MAGENTA })
     }
+
 }

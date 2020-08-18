@@ -30,10 +30,8 @@ class ContainerBehavior() : AppBarLayout.ScrollingViewBehavior() {
             val height = View.MeasureSpec.getSize(parentHeightMeasureSpec) - ah - bh
             parent.onMeasureChild(
                 child,
-                parentWidthMeasureSpec,
-                widthUsed,
-                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY),
-                heightUsed
+                parentWidthMeasureSpec, widthUsed,
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY), heightUsed
             )
             return true
         }
