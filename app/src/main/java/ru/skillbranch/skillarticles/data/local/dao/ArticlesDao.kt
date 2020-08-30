@@ -24,7 +24,7 @@ interface ArticlesDao : BaseDao<Article> {
         SELECT * FROM articles
     """
     )
-    fun findArticles(): LiveData<List<Article>>
+    fun findArticles(): List<Article>
 
     @Query(
         """
@@ -32,14 +32,14 @@ interface ArticlesDao : BaseDao<Article> {
         WHERE id = :id
     """
     )
-    fun findArticleById(id: String): LiveData<Article>
+    fun findArticleById(id: String): Article
 
     @Query(
         """
         SELECT * FROM ArticleItem
     """
     )
-    fun findArticleItems(): LiveData<List<ArticleItem>>
+    fun findArticleItems(): List<ArticleItem>
 
     @Delete
     fun delete(article: Article)
@@ -50,7 +50,7 @@ interface ArticlesDao : BaseDao<Article> {
         WHERE category_id IN(:categoryIds)
     """
     )
-    fun findArticleItemsByCategoryIds(categoryIds: List<String>): LiveData<List<ArticleItem>>
+    fun findArticleItemsByCategoryIds(categoryIds: List<String>): List<ArticleItem>
 
     @Query(
         """
@@ -59,7 +59,7 @@ interface ArticlesDao : BaseDao<Article> {
         WHERE refs.t_id = :tag
     """
     )
-    fun findArticlesByTagId(tag: String): LiveData<List<ArticleItem>>
+    fun findArticlesByTagId(tag: String): List<ArticleItem>
 
     @RawQuery(observedEntities = [ArticleItem::class])
     fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): DataSource.Factory<Int, ArticleItem>
