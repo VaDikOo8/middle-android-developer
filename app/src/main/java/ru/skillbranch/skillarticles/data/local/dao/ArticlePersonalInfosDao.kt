@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
@@ -15,6 +16,21 @@ interface ArticlePersonalInfosDao : BaseDao<ArticlePersonalInfo> {
             .filterNotNull()
             .also { if (it.isNotEmpty()) update(it) }
     }
+
+    @Query(
+        """
+            SELECT * FROM article_personal_infos
+        """
+    )
+    fun findPersonalInfos(): LiveData<List<ArticlePersonalInfo>>
+
+    @Query(
+        """
+            SELECT * FROM article_personal_infos
+            WHERE article_id = :articleId
+        """
+    )
+    fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo>
 
     @Query(
         """

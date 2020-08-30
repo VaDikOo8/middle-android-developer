@@ -95,9 +95,9 @@ object ArticleRepository : IArticleRepository {
         }.apply { Thread.sleep(1500) }
     }
 
-    override fun sendMessage(articleId: String, comment: String, answerToSlug: String?) {
+    override fun sendMessage(articleId: String, text: String, answerToSlug: String?) {
         network.sendMessage(
-            articleId, comment, answerToSlug,
+            articleId, text, answerToSlug,
             User("777", "John Doe", "https://skill-branch.ru/img/mail/bot/android-category.png")
         )
         articleCountsDao.incrementCommentsCount(articleId)
