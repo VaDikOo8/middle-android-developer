@@ -92,6 +92,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_poster" />
 
+        <TextView
+            android:id="@+id/tv_hashtags"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_text_content"
+            tools:text="Hashtags" />
+
+        <TextView
+            android:id="@+id/tv_source"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/wrap_comments"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_hashtags"
+            tools:text="Source" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/wrap_comments"
             style="@style/Base.Widget.MaterialComponents.TextInputLayout"
@@ -108,7 +131,7 @@
             app:endIconTint="@color/color_gray"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_text_content">
+            app:layout_constraintTop_toBottomOf="@id/tv_source">
 
             <EditText
                 android:id="@+id/et_comment"

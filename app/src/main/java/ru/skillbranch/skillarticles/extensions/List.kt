@@ -38,3 +38,18 @@ fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<List<
 
     return results
 }
+
+fun List<String>.indexesOf(
+    listToString: String
+): List<Pair<Int, Int>> {
+    val indexes: MutableList<Pair<Int, Int>> = mutableListOf()
+    this.forEach {
+        if (!this.isNullOrEmpty() && it.isNotEmpty()) {
+            val substr = it
+            listToString.indexesOf(it).run {
+                indexes.add(this.first() to this.first() + substr.length)
+            }
+        }
+    }
+    return indexes
+}

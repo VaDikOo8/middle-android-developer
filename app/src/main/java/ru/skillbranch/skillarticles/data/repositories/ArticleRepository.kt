@@ -2,7 +2,6 @@ package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
 import ru.skillbranch.skillarticles.data.NetworkDataHolder
@@ -25,7 +24,7 @@ interface IArticleRepository {
     fun getAppSettings(): LiveData<AppSettings>
     fun toggleLike(articleId: String)
     fun toggleBookmark(articleId: String)
-    fun isAuth(): MutableLiveData<Boolean>
+    fun isAuth(): LiveData<Boolean>
     fun loadCommentsByRange(slug: String?, size: Int, articleId: String): List<CommentItemData>
     fun sendMessage(articleId: String, text: String, answerToSlug: String?)
     fun loadAllComents(articleId: String, total: Int): CommentsDataFactory
@@ -62,7 +61,7 @@ object ArticleRepository : IArticleRepository {
     }
 
     override fun getAppSettings(): LiveData<AppSettings> =
-        preferences.getAppSettings() //from preferences
+        preferences.appSettings //from preferences
 
     override fun toggleLike(articleId: String) {
         articlePersonalDao.toggleLikeOrInsert(articleId)
@@ -72,7 +71,7 @@ object ArticleRepository : IArticleRepository {
         articlePersonalDao.toggleBookmarkOrInsert(articleId)
     }
 
-    override fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
+    override fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 
     override fun loadCommentsByRange(
         slug: String?,
@@ -120,7 +119,8 @@ object ArticleRepository : IArticleRepository {
     }
 
     override fun updateSettings(copy: AppSettings) {
-        //TODO implement me
+        preferences.isDarkMode = copy.isDarkMode
+        preferences.isBigText = copy.isBigText
     }
 
     override fun fetchArticleContent(articleId: String) {

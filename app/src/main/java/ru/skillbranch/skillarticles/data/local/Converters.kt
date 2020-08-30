@@ -18,3 +18,13 @@ class MarkdownConverter {
     fun toMarkdown(content: String?): List<MarkdownElement>? =
         content?.let { MarkdownParser.parse(it) }
 }
+
+class ListConverter {
+    @TypeConverter
+    fun fromList(content: List<String>?): String? =
+        content?.joinToString { "," }
+
+    @TypeConverter
+    fun toList(content: String?): List<String>? =
+        content?.let { it.split(",") }
+}
