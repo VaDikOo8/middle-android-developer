@@ -26,7 +26,7 @@ object DbManager {
         ArticleTagXRef::class,
         ArticleContent::class],
     version = AppDb.DATABASE_VERSION,
-    exportSchema = false,
+    exportSchema = true,
     views = [ArticleItem::class, ArticleFull::class]
 )
 @TypeConverters(DateConverter::class)
