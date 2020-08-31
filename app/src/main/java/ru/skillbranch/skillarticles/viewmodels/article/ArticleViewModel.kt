@@ -247,7 +247,7 @@ data class ArticleState(
     val answerToSlug: String? = null,
     val showBottomBar: Boolean = true,
     val commentText: String? = null,
-    val hashTags: List<String> = emptyList(),
+    val hashTags: List<String>? = emptyList(),
     val source: String? = null
 
 ) : IViewModelState {

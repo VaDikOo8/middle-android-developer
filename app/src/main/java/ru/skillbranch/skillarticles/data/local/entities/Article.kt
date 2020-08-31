@@ -99,5 +99,5 @@ data class ArticleFull(
     val date: Date,
     val content: List<MarkdownElement>? = null,
     val source: String? = null, //TODO implement me
-    val tags: List<String> = emptyList()
+    val tags: List<String>? = emptyList()
 )

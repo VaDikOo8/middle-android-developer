@@ -451,7 +451,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             isBigText = data.isBigText
             isDarkMode = data.isDarkMode
             content = data.content
-            hashTags = data.hashTags
+            hashTags = data.hashTags ?: emptyList()
             source = data.source ?: ""
 
             isLoadingContent = data.isLoadingContent
