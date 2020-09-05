@@ -21,10 +21,5 @@ class MarkdownConverter {
 
 class ListConverter {
     @TypeConverter
-    fun fromList(content: List<String>?): String? =
-        content?.joinToString { "," }
-
-    @TypeConverter
-    fun toList(content: String?): List<String>? =
-        content?.let { it.split(",") }
+    fun toList(content: String?): List<String>? = content?.split(",") ?: emptyList()
 }
