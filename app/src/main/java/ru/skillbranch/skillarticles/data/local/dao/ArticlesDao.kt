@@ -2,7 +2,10 @@ package ru.skillbranch.skillarticles.data.local.dao
 
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.data.local.entities.Article
 import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
@@ -12,7 +15,7 @@ import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 interface ArticlesDao : BaseDao<Article> {
 
     @Transaction
-    fun upsert(list: List<Article>) {
+    suspend fun upsert(list: List<Article>) {
         insert(list)
             .mapIndexed { index, recordResult -> if (recordResult == -1L) list[index] else null }
             .filterNotNull()
@@ -41,9 +44,6 @@ interface ArticlesDao : BaseDao<Article> {
     )
     fun findArticleItems(): LiveData<List<ArticleItem>>
 
-    @Delete
-    fun delete(article: Article)
-
     @Query(
         """
         SELECT * FROM ArticleItem
@@ -71,5 +71,12 @@ interface ArticlesDao : BaseDao<Article> {
         """
     )
     fun findFullArticle(articleId: String): LiveData<ArticleFull>
+
+    @Query(
+        """
+            SELECT id FROM articles ORDER BY date DESC LIMIT 1
+        """
+    )
+    fun findLastArticleId(): String?
 
 }
